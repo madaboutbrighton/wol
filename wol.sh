@@ -6,6 +6,8 @@
 # Summary - Wakes a computer and checks for a mySQL connection
 #
 
+## Change the follwing settings as required ##
+
 # Which actions to take
 DO_WOL=1
 DO_MYSQL=1
@@ -23,8 +25,10 @@ WAIT_LAN=1
 WAIT_MYSQL=5
 WAIT_FINAL=5
 WAIT_MAX=300
-WAIT_HAPPENED=0
-WAIT_COUNT=0
+
+## Not recommended to change anything below this line ##
+
+timesofar=0
     
 if [ $DO_WOL -eq 1 ]; then
   #
@@ -35,13 +39,13 @@ if [ $DO_WOL -eq 1 ]; then
 
   until /usr/bin/wakeonlan $SERVER_MAC > /dev/null 2>&1 ; do
   
-    if [ $WAIT_COUNT -gt $WAIT_MAX ]; then
-      echo "Waited too long."
+    if [ $timesofar -gt $WAIT_MAX ]; then
+      echo "Waited too long"
       exit 0;
     fi
   
-    WAIT_COUNT=$((WAIT_COUNT + WAIT_LAN))
-    WAIT_HAPPENED=1
+    timesofar=$((timesofar + WAIT_LAN))
+
     sleep $WAIT_LAN
   done
 
@@ -56,24 +60,24 @@ if [ $DO_MYSQL -eq 1 ]; then
 
   until mysql -e "SELECT USER();" -h $SERVER_IP -u $MYSQL_USER --password=$MYSQL_PASS > /dev/null 2>&1 ; do
 
-    if [ $WAIT_COUNT -gt $WAIT_MAX ]; then
-      echo "Waited too long."
+    if [ $timesofar -gt $WAIT_MAX ]; then
+      echo "Waited too long"
       exit 0;
     fi
   
-    WAIT_COUNT=$((WAIT_COUNT + WAIT_MYSQL))
-    WAIT_HAPPENED=1
+    timesofar=$((timesofar + WAIT_MYSQL))
+
     sleep $WAIT_MYSQL
   done
 
   echo "Connected to mySQL on $SERVER_IP"
-fi
-
-#
-# An extra wait is required if mysql was not already running
-#
-if [ $WAIT_HAPPENED -eq 1 ]; then
-	sleep $WAIT_FINAL
+  
+  # An extra wait is required if mySQL was not already running
+  if [ $timesofar -gt 0 ]; then
+    sleep $WAIT_FINAL
+  fi
 fi
 	
+echo "Success"
+  
 exit 0

@@ -1,9 +1,8 @@
 #! /bin/sh
 #
-# Location /etc/kodi/live.d
-# Referenced /etc/init/xbmcbuntu.conf
-# Dependencies - wakeonlan, mysql-client
+# Author - madaboutbrighton.net
 # Summary - Wakes a computer and checks for a mySQL connection
+# Dependencies - wakeonlan, mysql-client
 #
 
 ## Change the follwing settings as required ##
@@ -17,8 +16,8 @@ SERVER_MAC='MA:CA:DD:RE:SS:00'
 SERVER_IP='192.168.999.666'
 
 # mySQL settings on backend
-MYSQL_USER='dummy'
-MYSQL_PASS='mydummymysqlpassword'
+MYSQL_USER='mydummyusername'
+MYSQL_PASS='mydummypassword'
 
 # Wait settings (in seconds)
 WAIT_LAN=1

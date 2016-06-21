@@ -22,8 +22,7 @@ MYSQL_PASS='mydummypassword'
 # Wait settings (in seconds)
 WAIT_LAN=1
 WAIT_MYSQL=5
-WAIT_FINAL=5
-WAIT_MAX=40
+WAIT_MAX=300
 
 ## Not recommended to change anything below this line ##
 
@@ -39,7 +38,7 @@ if [ $DO_WOL -eq 1 ]; then
   until /usr/bin/wakeonlan $SERVER_MAC > /dev/null 2>&1 ; do
   
     if [ $timesofar -gt $WAIT_MAX ]; then
-      echo "Waited too long"
+      echo "Giving up - waited $WAIT_MAX seconds"
       exit 0;
     fi
   
@@ -60,7 +59,7 @@ if [ $DO_WOL -eq 1 ]; then
   until [ ${pingcount:-0} -gt 0 ]; do
   
     if [ $timesofar -gt $WAIT_MAX ]; then
-      echo "Waited too long"
+      echo "Giving up - waited $WAIT_MAX seconds"
       exit 0;
     fi
   
@@ -79,14 +78,17 @@ if [ $DO_MYSQL -eq 1 ]; then
   # Try to connect with mysql until it connects successfully
   #
   echo "Waiting for mySQL on $SERVER_IP"
-
+  
+  wasloaded=1
+  
   until mysql -e "SELECT USER();" -h $SERVER_IP -u $MYSQL_USER --password=$MYSQL_PASS > /dev/null 2>&1 ; do
 
     if [ $timesofar -gt $WAIT_MAX ]; then
-      echo "Waited too long"
+      echo "Giving up - waited $WAIT_MAX seconds"
       exit 0;
     fi
-  
+
+    wasloaded=0
     timesofar=$((timesofar + WAIT_MYSQL))
 
     sleep $WAIT_MYSQL
@@ -95,8 +97,10 @@ if [ $DO_MYSQL -eq 1 ]; then
   echo "  -Connected to mySQL on $SERVER_IP"
   
   # An extra wait is required if mySQL was not already running
-  if [ $timesofar -gt 0 ]; then
-    sleep $WAIT_FINAL
+  if [ $wasloaded -eq 0 ]; then
+  
+    echo "  -Giving mySQL $WAIT_MYSQL more seconds"
+    sleep $WAIT_MYSQL
   fi
 fi
 	

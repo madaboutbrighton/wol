@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # Author - madaboutbrighton.net
-# Summary - Wakes a computer and checks for a mySQL connection
+# Summary - Wakes a computer [optional] and checks for a mySQL connection [optional]
 # Dependencies - wakeonlan, mysql-client
 #
 
